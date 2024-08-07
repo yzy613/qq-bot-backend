@@ -69,15 +69,18 @@ func (s *sCommand) TryCommand(ctx context.Context, message string) (catch bool, 
 			}
 			// /raw <>
 			catch, retMsg = true, next[2]
-		case "model":
-			// /model <>
-			catch, retMsg = tryModelSet(ctx, next[2])
+		case "broadcast":
+			// /broadcast <>
+			catch, retMsg = tryBroadcast(ctx, next[2])
 		case "token":
 			// /token <>
 			catch, retMsg = tryToken(ctx, next[2])
 		case "sys":
 			// /sys <>
 			catch, retMsg = trySys(ctx, next[2])
+		case "model":
+			// /model <>
+			catch, retMsg = tryModelSet(ctx, next[2])
 		}
 	case endBranchRe.MatchString(cmd):
 		// 权限校验

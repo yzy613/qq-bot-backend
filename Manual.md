@@ -143,17 +143,18 @@ v1.8
 
 ## Extra
 
-| Command                          | Description        | Comment             |
-|----------------------------------|--------------------|---------------------|
-| /raw \<message>                  | 获取 message 的原始信息   | 需要系统授予的获取 raw 的权限   |
-| /model set \<model>              | 设置机型               | 需要受系统信任             |
-| /token add \<name> \<token>      | 添加可让 user 接入本系统的令牌 | 需要系统授予的操作 token 的权限 |
-| /token rm \<name>                | 删除令牌               | 需要系统授予的操作 token 的权限 |
-| /token query                     | 查询自己所有的令牌          | 需要系统授予的操作 token 的权限 |
-| /token query \<name>             | 查询令牌               | 需要系统授予的操作 token 的权限 |
-| /token chown \<owner_id> \<name> | 修改令牌 owner         | 需要系统授予的操作 token 的权限 |
-| /token bind \<bot_id> \<name>    | 绑定令牌使用的机器人账号       | 需要系统授予的操作 token 的权限 |
-| /token unbind \<name>            | 解绑令牌使用的机器人账号       | 需要系统授予的操作 token 的权限 |
+| Command                               | Description        | Comment                  |
+|---------------------------------------|--------------------|--------------------------|
+| /raw \<message>                       | 获取 message 的原始信息   | 需要系统授予的获取 raw 的权限        |
+| /broadcast group <group_id> <content> | 广播消息到群             | 需要 namespace admin 或更高权限 |
+| /model set \<model>                   | 设置机型               | 需要受系统信任                  |
+| /token add \<name> \<token>           | 添加可让 user 接入本系统的令牌 | 需要系统授予的操作 token 的权限      |
+| /token rm \<name>                     | 删除令牌               | 需要系统授予的操作 token 的权限      |
+| /token query                          | 查询自己所有的令牌          | 需要系统授予的操作 token 的权限      |
+| /token query \<name>                  | 查询令牌               | 需要系统授予的操作 token 的权限      |
+| /token chown \<owner_id> \<name>      | 修改令牌 owner         | 需要系统授予的操作 token 的权限      |
+| /token bind \<bot_id> \<name>         | 绑定令牌使用的机器人账号       | 需要系统授予的操作 token 的权限      |
+| /token unbind \<name>                 | 解绑令牌使用的机器人账号       | 需要系统授予的操作 token 的权限      |
 
 ## Advanced features
 

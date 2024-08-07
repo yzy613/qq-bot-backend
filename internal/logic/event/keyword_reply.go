@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	atPrefixRe      = regexp.MustCompile(`^\[CQ:at,qq=(\d+)]\s*`)
+	atPrefixRe      = regexp.MustCompile(`^\[CQ:at,qq=([^,]+)(?:,[^,=]+=[^,]*)*]\s*`)
 	webhookPrefixRe = regexp.MustCompile(`^webhook(?::([A-Za-z]{3,7}))?(?:#([\s\S]+)#)?(?:<([\s\S]+)>)?(?:@(.+)@)?://(.+)$`)
 	commandPrefixRe = regexp.MustCompile(`^(?:command|cmd)://([\s\S]+)$`)
 	rewritePrefixRe = regexp.MustCompile(`^rewrite://([\s\S]+)$`)
@@ -214,7 +214,7 @@ func (s *sEvent) keywordReplyWebhook(ctx context.Context, userId, groupId int64,
 		replyMsg = "Wrong JSON path"
 		return
 	}
-	if node.Type() != ast.V_STRING {
+	if node.TypeSafe() != ast.V_STRING {
 		err = node.LoadAll()
 		if err != nil {
 			replyMsg = "Wrong JSON format"
@@ -241,10 +241,8 @@ func (s *sEvent) keywordReplyCommand(ctx context.Context, message, hit, text str
 	// 转换占位符
 	subMatch[1] = decrementPlaceholderIndex(subMatch[1])
 	// 为什么是 " &&"？因为 " &&" 后可能是换行符，需要替换为 " "
-	if strings.Contains(subMatch[1], " &&") {
-		subMatch[1] = strings.ReplaceAll(subMatch[1], "\r", " ")
-		subMatch[1] = strings.ReplaceAll(subMatch[1], "\n", " ")
-	}
+	subMatch[1] = strings.ReplaceAll(subMatch[1], " &&\r", " && ")
+	subMatch[1] = strings.ReplaceAll(subMatch[1], " &&\n", " && ")
 	// 切分命令
 	commands := strings.Split(subMatch[1], " && ")
 	var replyBuilder strings.Builder
@@ -278,10 +276,8 @@ func (s *sEvent) keywordReplyRewrite(ctx context.Context, try func(context.Conte
 	subMatch[1] = strings.ReplaceAll(subMatch[1], "{message}", message)
 	subMatch[1] = strings.ReplaceAll(subMatch[1], "{remain}", remain)
 	// 为什么是 " &"？因为 " &" 后可能是换行符，需要替换为 " "
-	if strings.Contains(subMatch[1], " &") {
-		subMatch[1] = strings.ReplaceAll(subMatch[1], "\r", " ")
-		subMatch[1] = strings.ReplaceAll(subMatch[1], "\n", " ")
-	}
+	subMatch[1] = strings.ReplaceAll(subMatch[1], " &\r", " & ")
+	subMatch[1] = strings.ReplaceAll(subMatch[1], " &\n", " & ")
 	// 切分
 	rewrites := strings.Split(subMatch[1], " & ")
 	for _, rewrite := range rewrites {
