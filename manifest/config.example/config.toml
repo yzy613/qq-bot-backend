@@ -69,7 +69,7 @@ stdoutColorDisabled = false # 关闭终端的颜色打印。默认开启
 writerColorEnable = false # 日志文件是否带上颜色。默认false，表示不带颜色
 
 [database.default]
-link = "pgsql:user:password@tcp(domain:5432)/qq_bot"
+link = "pgsql:user:password@tcp(domain:5432)/qq_bot?TimeZone=Asia/Shanghai"
 
 [otel]
 endpoint = "localhost:4317"
