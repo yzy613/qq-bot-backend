@@ -33,11 +33,11 @@ func (s *sEvent) TryKeywordRecall(ctx context.Context) (caught bool) {
 	hit := ""
 	// 处理
 	if _, ok := policy[consts.BlacklistCmd]; ok {
-		shouldRecall, hit, _ = service.Util().IsOnKeywordLists(ctx, msg, service.Group().GetKeywordBlacklists(ctx, groupId))
+		shouldRecall, hit, _ = service.Util().FindBestKeywordMatch(ctx, msg, service.Group().GetKeywordBlacklists(ctx, groupId))
 	}
 	if _, ok := policy[consts.WhitelistCmd]; ok && shouldRecall {
-		in, _, _ := service.Util().IsOnKeywordLists(ctx, msg, service.Group().GetKeywordWhitelists(ctx, groupId))
-		shouldRecall = !in
+		found, _, _ := service.Util().FindBestKeywordMatch(ctx, msg, service.Group().GetKeywordWhitelists(ctx, groupId))
+		shouldRecall = !found
 	}
 	// 结果处理
 	if !shouldRecall {

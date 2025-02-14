@@ -58,8 +58,8 @@ func (s *sEvent) TryKeywordReply(ctx context.Context) (caught bool) {
 		}
 	}
 	// 匹配关键词
-	contains, hit, value := service.Util().IsOnKeywordLists(ctx, msg, service.Namespace().GetGlobalNamespaceLists(ctx))
-	if !contains || value == "" {
+	found, hit, value := service.Util().FindBestKeywordMatch(ctx, msg, service.Namespace().GetGlobalNamespaceLists(ctx))
+	if !found || value == "" {
 		return
 	}
 	// 匹配成功，回复

@@ -28,13 +28,13 @@ func (s *sEvent) TryForward(ctx context.Context) (caught bool) {
 
 	aliasList := service.Namespace().GetForwardingToAliasList(ctx)
 	for alias := range aliasList {
+		url, key := service.Namespace().GetForwardingTo(ctx, alias)
+		if url == "" {
+			return
+		}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			url, key := service.Namespace().GetForwardingTo(ctx, alias)
-			if url == "" {
-				return
-			}
 			service.Bot().Forward(ctx, url, key)
 		}()
 	}

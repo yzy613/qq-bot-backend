@@ -17,24 +17,51 @@ func init() {
 	service.RegisterUtil(New())
 }
 
-func (s *sUtil) IsOnKeywordLists(ctx context.Context, msg string, lists map[string]any) (in bool, hit, value string) {
+func (s *sUtil) FindBestKeywordMatch(ctx context.Context, msg string, lists map[string]any,
+) (found bool, hit, value string) {
+	type result struct {
+		hit   string
+		value string
+	}
+
+	var (
+		bestPrefix    *result
+		bestNonPrefix *result
+	)
+
 	for k := range lists {
-		listMap := service.List().GetListData(ctx, k)
-		if contains, hitStr, valueStr := s.MultiContains(msg, listMap); contains {
-			in = true
-			hit = hitStr
-			value = valueStr
-			if strings.HasPrefix(msg, hit) {
-				return
+		eureka, hitStr, valueStr := s.MatchAllKeywords(msg, service.List().GetListData(ctx, k))
+		if !eureka {
+			continue
+		}
+
+		if strings.HasPrefix(msg, hitStr) {
+			if bestPrefix == nil || len(hitStr) > len(bestPrefix.hit) {
+				bestPrefix = &result{hitStr, valueStr}
+			}
+		} else {
+			if bestNonPrefix == nil || len(hitStr) > len(bestNonPrefix.hit) {
+				bestNonPrefix = &result{hitStr, valueStr}
 			}
 		}
+	}
+
+	if bestPrefix != nil {
+		found = true
+		hit = bestPrefix.hit
+		value = bestPrefix.value
+		return
+	}
+	if bestNonPrefix != nil {
+		found = true
+		hit = bestNonPrefix.hit
+		value = bestNonPrefix.value
 	}
 	return
 }
 
-func (s *sUtil) MultiContains(str string, m map[string]any) (contains bool, hit string, mValue string) {
-	arr := utility.ReverseSortedArrayFromMapKey(m)
-	for _, k := range arr {
+func (s *sUtil) MatchAllKeywords(str string, m map[string]any) (eureka bool, hit string, mValue string) {
+	for _, k := range utility.ReverseSortedArrayFromMapKey(m) {
 		fields := strings.Fields(k)
 		allContains := true
 		for _, kk := range fields {
@@ -46,7 +73,7 @@ func (s *sUtil) MultiContains(str string, m map[string]any) (contains bool, hit 
 		if !allContains {
 			continue
 		}
-		contains = true
+		eureka = true
 		hit = k
 		if vv, ok := m[k].(string); ok {
 			mValue = vv

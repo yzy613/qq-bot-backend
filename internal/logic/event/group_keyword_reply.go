@@ -32,8 +32,8 @@ func (s *sEvent) TryGroupKeywordReply(ctx context.Context) (caught bool) {
 	} else {
 		lists = service.Namespace().GetGlobalNamespaceLists(ctx)
 	}
-	contains, hit, value := service.Util().IsOnKeywordLists(ctx, msg, lists)
-	if !contains || value == "" {
+	found, hit, value := service.Util().FindBestKeywordMatch(ctx, msg, lists)
+	if !found || value == "" {
 		return
 	}
 	// 匹配成功，回复
