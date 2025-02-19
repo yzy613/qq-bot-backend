@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"crypto/hmac"
-	"crypto/sha1"
+	"crypto/sha256"
 	"github.com/bytedance/sonic"
 	"github.com/gogf/gf/v2/encoding/gbase64"
 	"github.com/gogf/gf/v2/frame/g"
@@ -44,7 +44,7 @@ func (c *ControllerV1) Command(ctx context.Context, req *v1.CommandReq) (res *v1
 	// 验证 token
 	pass, tokenName, ownerId, botId := service.Token().IsCorrectToken(ctx, req.Token)
 	if !pass {
-		err = gerror.NewCode(errcode.PermissionDenied)
+		err = gerror.NewCode(errcode.Unauthorized)
 		return
 	}
 	// 防止重放攻击
@@ -56,14 +56,14 @@ func (c *ControllerV1) Command(ctx context.Context, req *v1.CommandReq) (res *v1
 	// 验证签名
 	{
 		// 以 token+command+group_id+timestamp+message_sync+async 为原文，
-		// 以 token_name 为 key 的 HmacSha1 值的 base64 值
+		// 以 token_name 为 key 的 HmacSHA256 值的 base64 值
 		s := req.Token + req.Command + gconv.String(req.GroupId) +
 			gconv.String(req.Timestamp) + gconv.String(req.MessageSync) +
 			gconv.String(req.Async)
-		// HmacSha1
-		hmacSha1 := hmac.New(sha1.New, []byte(tokenName))
-		hmacSha1.Write([]byte(s))
-		macBase64 := gbase64.Encode(hmacSha1.Sum(nil))
+		// HmacSHA256
+		h := hmac.New(sha256.New, []byte(tokenName))
+		h.Write([]byte(s))
+		macBase64 := gbase64.Encode(h.Sum(nil))
 		if !hmac.Equal(macBase64, []byte(req.Signature)) {
 			err = gerror.NewCode(errcode.SignatureError)
 			return
@@ -116,17 +116,17 @@ func (c *ControllerV1) Command(ctx context.Context, req *v1.CommandReq) (res *v1
 		return
 	}
 	if req.GroupId == 0 || !service.Group().IsBinding(botCtx, req.GroupId) {
-		err = gerror.NewCode(errcode.GroupNotBinding)
+		err = gerror.NewCode(errcode.GroupNotBound)
 		return
 	}
 	if !service.Bot().IsGroupOwnerOrAdminOrSysTrusted(botCtx) {
-		err = gerror.NewCode(errcode.PermissionDenied)
+		err = gerror.NewCode(errcode.Forbidden)
 		return
 	}
 	// 限速 一分钟只能发送 5 条消息
 	if limit, _ := utility.AutoLimit(ctx,
 		"send_msg", gconv.String(req.GroupId), 5, time.Minute); limit {
-		err = gerror.NewCode(errcode.TooManyRequests)
+		err = gerror.NewCode(errcode.TooMany)
 		return
 	}
 	// 发送消息

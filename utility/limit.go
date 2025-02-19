@@ -16,7 +16,7 @@ func AutoLimit(ctx context.Context,
 	cacheKey := "LimitTimes_" + kind + "_" + key
 
 	// Try to get the cache value, or set it with the default value if it doesn't exist
-	timesVar, err := gcache.GetOrSet(ctx, cacheKey, 0, duration)
+	timesVar, err := gcache.GetOrSet(ctx, cacheKey, 1, duration)
 	if err != nil {
 		g.Log().Error(ctx, err)
 		return
@@ -32,7 +32,7 @@ func AutoLimit(ctx context.Context,
 	}
 
 	// Check if the times exceed the limit
-	if times >= limitTimes {
+	if times > limitTimes {
 		limited = true
 	}
 	return

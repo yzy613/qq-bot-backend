@@ -21,7 +21,7 @@ func (s *sUtil) AutoMute(ctx context.Context,
 	// 最终禁言分钟数
 	muteMinutes := 1
 	// 执行幂次运算
-	for range times {
+	for range times - limitTimes {
 		muteMinutes *= baseMinutes
 		if limitMinutes > 0 && muteMinutes > limitMinutes {
 			muteMinutes = limitMinutes

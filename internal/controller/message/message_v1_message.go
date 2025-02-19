@@ -31,7 +31,7 @@ func (c *ControllerV1) Message(ctx context.Context, req *v1.MessageReq) (res *v1
 		// 忽视前置的 Bearer 或 Token 进行鉴权
 		authorizations := strings.Fields(g.RequestFromCtx(ctx).Header.Get("Authorization"))
 		if len(authorizations) < 2 {
-			err = gerror.NewCode(errcode.Forbidden)
+			err = gerror.NewCode(errcode.Unauthorized)
 			return
 		}
 		req.Token = authorizations[1]
@@ -39,22 +39,22 @@ func (c *ControllerV1) Message(ctx context.Context, req *v1.MessageReq) (res *v1
 	// token 验证
 	pass, tokenName, ownerId, botId := service.Token().IsCorrectToken(ctx, req.Token)
 	if !pass {
-		err = gerror.NewCode(errcode.Forbidden)
+		err = gerror.NewCode(errcode.Unauthorized)
 		return
 	}
 	// 权限校验
 	if !service.Namespace().IsNamespaceOwnerOrAdmin(ctx, service.Namespace().GetGlobalNamespace(), ownerId) {
 		if req.GroupId == 0 {
-			err = gerror.NewCode(errcode.PermissionDenied)
+			err = gerror.NewCode(errcode.Forbidden)
 			return
 		}
 		namespace := service.Group().GetNamespace(ctx, req.GroupId)
 		if namespace == "" {
-			err = gerror.NewCode(errcode.PermissionDenied)
+			err = gerror.NewCode(errcode.Forbidden)
 			return
 		}
 		if !service.Namespace().IsNamespaceOwnerOrAdmin(ctx, namespace, ownerId) {
-			err = gerror.NewCode(errcode.PermissionDenied)
+			err = gerror.NewCode(errcode.Forbidden)
 			return
 		}
 	}
@@ -91,7 +91,7 @@ func (c *ControllerV1) Message(ctx context.Context, req *v1.MessageReq) (res *v1
 	// 限速 一分钟只能发送 7 条消息
 	if limit, _ := utility.AutoLimit(ctx,
 		"send_msg", gconv.String(req.UserId+req.GroupId), 7, time.Minute); limit {
-		err = gerror.NewCode(errcode.TooManyRequests)
+		err = gerror.NewCode(errcode.TooMany)
 		return
 	}
 	// send message
